@@ -67,6 +67,18 @@ public class CacheBackedFlowIdDAO extends FlowIdDAOImpl {
         restAuthCache.addToCache(flowIdKey, flowIdEntry);
     }
 
+    private void addToCacheOnRead(FlowIdDO flowIdDO, String tenantDomain) {
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("[AddToCacheOnRead] Add cache for the REST authentication flow " + flowIdDO.getFlowId()
+                    + "@" + tenantDomain);
+        }
+
+        AuthCacheKey flowIdKey = new AuthCacheKey(flowIdDO.getFlowId());
+        AuthCacheEntry flowIdEntry = new AuthCacheEntry(flowIdDO);
+        restAuthCache.addToCacheOnRead(flowIdKey, flowIdEntry);
+    }
+
     @Override
     public void addFlowIdData(FlowIdDO flowIdDO) throws AuthenticationException {
         String authenticator = flowIdDO.getAuthenticatedSteps().get(flowIdDO.getAuthenticatedSteps().size());
@@ -127,7 +139,7 @@ public class CacheBackedFlowIdDAO extends FlowIdDAOImpl {
         if (flowIdDO == null) {
             // Cache miss, fetch from DB.
             flowIdDO = flowIdDAO.getFlowIdData(flowId);
-            addToCache(flowIdDO, tenantDomain);
+            addToCacheOnRead(flowIdDO, tenantDomain);
         }
 
         return flowIdDO;
